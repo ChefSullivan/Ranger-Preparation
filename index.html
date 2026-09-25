@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ranger Prep">
+<meta name="theme-color" content="#F4F1E8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16150F" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Ranger Prep</title>
+<style>
+:root{
+  color-scheme: light dark;
+  --bg:#F4F1E8;
+  --bar:rgba(244,241,232,.88);
+  --surface:#FFFFFF;
+  --surface-2:#EDE8DA;
+  --ink:#23211A;
+  --muted:#6F6955;
+  --line:#DDD5BF;
+  --accent:#A5472B;
+  --accent-ink:#FFF8F2;
+  --good:#3E6A33;
+  --good-bg:#E1EAD4;
+  --warn:#7E5310;
+  --warn-bg:#F2E4C8;
+  --bad:#A33A2A;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#16150F;
+    --bar:rgba(22,21,15,.86);
+    --surface:#211F17;
+    --surface-2:#2B291F;
+    --ink:#EEE8D6;
+    --muted:#A39C85;
+    --line:#38342A;
+    --accent:#E08A63;
+    --accent-ink:#1E120C;
+    --good:#A3C381;
+    --good-bg:#2C3620;
+    --warn:#E4B868;
+    --warn-bg:#3A2F17;
+    --bad:#EE8B77;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* Header */
+.top{position:sticky;top:0;z-index:10;background:var(--bar);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top,0px) + 8px) 16px 10px}
+.top-row{max-width:560px;margin:0 auto;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.top h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.015em}
+.top .sub{font-size:13px;color:var(--muted);font-weight:600}
+
+main{max-width:560px;margin:0 auto;padding:14px 16px calc(100px + env(safe-area-inset-bottom,0px))}
+
+/* Tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bar);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px 4px calc(env(safe-area-inset-bottom,0px) + 4px)}
+.tabbar-inner{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tabbar button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;font-size:10.5px;font-weight:600;color:var(--muted)}
+.tabbar svg{width:25px;height:25px}
+.tabbar button[aria-current="page"]{color:var(--accent)}
+
+/* Today: phase + day pickers */
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.seg button{border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:7px 2px;line-height:1.15}
+.seg b{display:block;font-size:15px}
+.seg small{display:block;font-size:11px;color:var(--muted)}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg button.on small{color:var(--accent-ink);opacity:.85}
+.phase-name{margin:8px 2px 0;font-size:13.5px;color:var(--muted);font-weight:600}
+.days{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+.days button{height:42px;border-radius:11px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:15px}
+.days button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* Workout card */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 14px 8px;margin-top:14px}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card h2{margin:3px 0 10px;font-size:22px;line-height:1.2;text-wrap:balance}
+details.warm{background:var(--surface-2);border-radius:12px;margin-bottom:6px}
+details.warm summary{padding:10px 12px;font-size:14px;font-weight:600;list-style:none;display:flex;justify-content:space-between}
+details.warm summary::-webkit-details-marker{display:none}
+details.warm summary::after{content:"Show";color:var(--muted);font-weight:500;font-size:13px}
+details.warm[open] summary::after{content:"Hide"}
+details.warm p{margin:0;padding:0 12px 12px;font-size:14px;color:var(--muted);line-height:1.5}
+
+.ex{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.ex:first-of-type{border-top:0}
+.chk{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:transparent;display:grid;place-items:center;padding:0;color:transparent}
+.chk svg{width:16px;height:16px}
+.ex.done .chk{background:var(--good);border-color:var(--good);color:var(--surface)}
+.ex-label{font-size:15.5px;font-weight:600;line-height:1.3}
+.ex.done .ex-label{color:var(--muted)}
+.ex-last{font-size:12.5px;color:var(--muted);margin-top:3px}
+.ex-last b{color:var(--ink);font-weight:700}
+.field{display:flex;flex-direction:column;align-items:center;gap:3px}
+.field input{width:76px;height:42px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2);color:var(--ink);font-size:17px;font-weight:600;text-align:center;padding:0 4px;font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none}
+.field input:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+.field span{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-size:16.5px;font-weight:700;background:var(--accent);color:var(--accent-ink)}
+.btn:active{filter:brightness(.93)}
+.btn.secondary{background:var(--surface-2);color:var(--ink)}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--line)}
+.save-row{margin:12px 0 6px}
+.hint{font-size:12.5px;color:var(--muted);text-align:center;margin:8px 0 0}
+
+.banner{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--warn-bg);color:var(--warn);border-radius:12px;padding:10px 12px;font-size:13.5px;font-weight:600;margin-bottom:12px}
+.banner button{border:0;background:var(--warn);color:var(--bg);border-radius:9px;padding:7px 11px;font-size:13px;font-weight:700;white-space:nowrap}
+
+/* Progress */
+.lede{margin:0 2px 4px;color:var(--muted);font-size:14px}
+.metric{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:12px}
+.m-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.m-name{font-weight:700;font-size:16px}
+.m-goal{font-size:12.5px;color:var(--muted);margin-top:1px}
+.m-val{font-size:32px;font-weight:800;letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums}
+.m-none{font-size:15px;font-weight:600;color:var(--muted);letter-spacing:0}
+.pill{font-size:12px;font-weight:700;padding:4px 9px;border-radius:99px;white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.spark{display:block;width:100%;height:auto;margin-top:6px}
+.spark-key{display:flex;gap:14px;font-size:11.5px;color:var(--muted);margin-top:2px}
+.spark-key i{display:inline-block;width:14px;height:0;border-top:2px dashed var(--muted);vertical-align:middle;margin-right:5px}
+.m-add{display:flex;gap:8px;margin-top:12px}
+.m-add input{flex:1;min-width:0;height:44px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2);color:var(--ink);font-size:17px;padding:0 12px;-webkit-appearance:none;appearance:none}
+.m-add button{height:44px;padding:0 18px;border-radius:11px;border:0;background:var(--ink);color:var(--bg);font-weight:700}
+details.m-list{margin-top:10px}
+details.m-list summary{font-size:13.5px;font-weight:600;color:var(--muted);padding:4px 0}
+.m-row{display:grid;grid-template-columns:1fr auto 36px;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:14.5px}
+.x{border:0;background:none;color:var(--muted);font-size:20px;line-height:1;height:32px;width:36px}
+
+/* History */
+.empty{text-align:center;color:var(--muted);padding:48px 12px;font-size:15px}
+details.sess{background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-top:10px;overflow:hidden}
+details.sess summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px}
+details.sess summary::-webkit-details-marker{display:none}
+.s-title{font-weight:700;font-size:15.5px}
+.s-meta{font-size:12.5px;color:var(--muted);margin-top:1px}
+.s-count{font-size:13px;font-weight:700;color:var(--muted);background:var(--surface-2);border-radius:99px;padding:3px 9px;white-space:nowrap}
+.s-count.full{background:var(--good-bg);color:var(--good)}
+.s-body{padding:0 14px 12px}
+.s-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.s-row .muted{color:var(--muted)}
+.s-row .num{font-weight:700;white-space:nowrap}
+.link-danger{border:0;background:none;color:var(--bad);font-size:14px;font-weight:600;padding:10px 0 0}
+
+/* More */
+.section{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:12px}
+.section h3{margin:0 0 8px;font-size:17px}
+.section p{margin:0 0 10px;font-size:14px;color:var(--muted);line-height:1.5}
+.section h4{margin:12px 0 4px;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.section h4:first-of-type{margin-top:0}
+.row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line);font-size:14.5px}
+.row span:last-child{font-weight:600;text-align:right}
+.stack{display:grid;gap:8px}
+
+/* Toast */
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 78px);transform:translate(-50%,10px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:30;max-width:calc(100% - 32px);text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion: reduce){#toast{transition:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-row"><h1 id="title">Today</h1><span class="sub" id="subtitle"></span></div>
+</header>
+<main id="view"></main>
+<nav class="tabbar" aria-label="Sections">
+  <div class="tabbar-inner">
+    <button data-tab="today" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>Today</button>
+    <button data-tab="progress">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-7"/></svg>Progress</button>
+    <button data-tab="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>History</button>
+    <button data-tab="more">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>More</button>
+  </div>
+</nav>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- Program ---------- */
+var PROGRAM = [
+  {name:'Base & Movement Quality', months:'Mo 1–3', days:[
+    {title:'Easy Run + Push Strength', items:[
+      {t:'Easy run, 3–4 mi (conversational pace)', u:'min'},
+      {t:'Dead-stop push-ups, 4×8', u:'reps'},
+      {t:'Shoulder press, 3×8', u:'lb'},
+      {t:'Bench press or incline push-ups, 3×10', u:'lb'},
+      {t:'Plank, 3×30s', u:'sec'}
+    ]},
+    {title:'Lower Body Strength', items:[
+      {t:'Goblet or back squat, 4×8', u:'lb'},
+      {t:'Romanian deadlift, 3×10', u:'lb'},
+      {t:'Weighted step-ups, 3×10 each leg', u:'lb'},
+      {t:'Hanging knee raises, 3×10', u:'reps'}
+    ]},
+    {title:'Tempo Run + Crawl/Rush', items:[
+      {t:'Tempo run, 3 mi (comfortably hard)', u:'min'},
+      {t:'25m high crawl → 25m 3–5s rush, 8–10 reps', u:'reps'}
+    ]},
+    {title:'Pull Strength', items:[
+      {t:'Chin-ups, 4× max (band if needed)', u:'reps'},
+      {t:'Bent-over rows, 3×10', u:'lb'},
+      {t:'Farmer’s carry, 3×40m (20–25 lb/hand)', u:'lb'},
+      {t:'Dead hang, 3×20s', u:'sec'}
+    ]},
+    {title:'Long Run + Sandbag Technique', items:[
+      {t:'Long run (your mileage plan)', u:'mi'},
+      {t:'Sandbag lift to shoulder, 3×8 (20–30 lb)', u:'lb'}
+    ]}
+  ]},
+  {name:'Strength & Loaded Carries', months:'Mo 4–6', days:[
+    {title:'Moderate Run + Weighted Push', items:[
+      {t:'Moderate run, 4–5 mi', u:'min'},
+      {t:'Weighted push-ups, 3×10', u:'lb'},
+      {t:'Weighted dips, 3×8', u:'lb'}
+    ]},
+    {title:'Heavy Push Day', items:[
+      {t:'Bench press (heavy), 4×5', u:'lb'},
+      {t:'DB overhead press, 3×8', u:'lb'},
+      {t:'Dead-stop push-ups, 4×10', u:'reps'},
+      {t:'Triceps pushdown or close-grip push-ups, 3×12', u:'lb'}
+    ]},
+    {title:'Sandbag & Carry Circuit', items:[
+      {t:'4 rounds: 8 sandbag lifts + 75m farmer’s carry, 90s rest', u:'lb'},
+      {t:'Rounds completed', u:'rounds'}
+    ]},
+    {title:'Heavy Pull Day', items:[
+      {t:'Weighted chin-ups, 4×6', u:'lb'},
+      {t:'Barbell or DB rows, 3×10', u:'lb'},
+      {t:'Weighted dead hang, 3×20s', u:'lb'},
+      {t:'Single-arm row, 3×10 each side', u:'lb'}
+    ]},
+    {title:'Long Run + Light Loaded Volume', items:[
+      {t:'Long run', u:'mi'},
+      {t:'Sandbag lifts at 25 lb, 3×10', u:'reps'},
+      {t:'Farmer’s carry 50m at 25 lb/hand, 3 sets', u:'lb'}
+    ]}
+  ]},
+  {name:'Event-Specific Intensity', months:'Mo 7–9', days:[
+    {title:'800m Intervals', items:[
+      {t:'6×800m faster than test pace, 2–3 min jog between (avg time)', u:'time'}
+    ]},
+    {title:'Strength Maintenance', items:[
+      {t:'Squat, 2×8', u:'lb'},
+      {t:'Bench press, 2×8', u:'lb'},
+      {t:'Row, 2×8', u:'lb'},
+      {t:'Weighted chin-up, 2×8', u:'lb'}
+    ]},
+    {title:'Combat Circuit Intervals', items:[
+      {t:'800m run at goal pace', u:'time'},
+      {t:'20 dead-stop push-ups, fast', u:'sec'},
+      {t:'100m sprint', u:'sec'},
+      {t:'8 sandbag lifts', u:'lb'},
+      {t:'50m farmer’s carry', u:'lb'},
+      {t:'25m crawl + 25m rush', u:'sec'},
+      {t:'400m run', u:'time'},
+      {t:'Rounds completed', u:'rounds'}
+    ]},
+    {title:'Strength + Grip Maintenance', items:[
+      {t:'Romanian deadlift or deadlift, 2×8', u:'lb'},
+      {t:'Overhead press, 2×8', u:'lb'},
+      {t:'Dead hang, 3×20s', u:'sec'},
+      {t:'Farmer’s carry static hold, 3×10s per hand', u:'lb'}
+    ]},
+    {title:'Long Run + 4-Mile Pace', items:[
+      {t:'Long run', u:'mi'},
+      {t:'4-mile pace run (target 28–29 min)', u:'time'}
+    ]}
+  ]},
+  {name:'Peak & Test Simulation', months:'Mo 10–12', days:[
+    {title:'Easy Recovery Run', items:[
+      {t:'Easy run, 2–3 mi (fully conversational)', u:'min'}
+    ]},
+    {title:'Strength Maintenance', items:[
+      {t:'Squat, 2×6 (moderate)', u:'lb'},
+      {t:'Press, 2×6', u:'lb'},
+      {t:'Row, 2×6', u:'lb'},
+      {t:'Weighted chin-up, 2×6', u:'lb'}
+    ]},
+    {title:'Test Sim / Half-Circuit', items:[
+      {t:'Every 2 weeks: full test simulation. Other weeks: first 4 events at max effort', u:'time'}
+    ]},
+    {title:'Strength + Speed', items:[
+      {t:'Squat, 2×8', u:'lb'},
+      {t:'Bench press, 2×8', u:'lb'},
+      {t:'200m sprints ×4, full recovery (best time)', u:'sec'}
+    ]},
+    {title:'4-Mile Time Trial', items:[
+      {t:'4-mile time trial (target under 30 min)', u:'time'}
+    ]}
+  ]}
+];
+
+var METRICS = [
+  {id:'pushups', name:'Dead-stop push-ups', detail:'Max unbroken', unit:'reps', goal:30, better:'high', kind:'num'},
+  {id:'sandbag', name:'Sandbag lifts', detail:'Reps at 40 lb to 68 in', unit:'reps', goal:16, better:'high', kind:'num'},
+  {id:'carry',   name:'Farmer’s carry', detail:'Weight per hand, 50 m', unit:'lb', goal:40, better:'high', kind:'num'},
+  {id:'circuit', name:'Combat circuit', detail:'Full Part 1, in boots', unit:'time', goal:14*60, better:'low', kind:'time'},
+  {id:'run4',    name:'4-mile run', detail:'PT uniform', unit:'time', goal:32*60, better:'low', kind:'time'}
+];
+
+var WARMUP = '3–5 min easy jog or bike · leg swings 10 each side · walking lunge with twist ×10 · arm circles + band pull-aparts ×15 · 2×5 bodyweight squats · 2×5 easy push-ups';
+var COOLDOWN = '2–3 min easy walk · stretch hamstrings, quads, hips, shoulders, chest 20–30s each · heavy days: 1–2 min dead hang or light carry hold';
+
+var STANDARD1 = [['Run','800 m'],['Dead-stop push-ups','30'],['Sprint','100 m'],['Sandbag lift','16 × 40 lb to 68 in'],['Farmer’s carry','50 m, 2 × 40 lb'],['Movement drill','25 m crawl + 25 m rush'],['Run','800 m']];
+var STANDARD2 = [['Run','4 mi in 32 min'],['Chin-ups','6']];
+
+var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+/* ---------- Storage ---------- */
+var KEY = 'rangerPrep.v1';
+var storageOK = true;
+
+function fresh(){ return {version:1, phase:1, day:1, tab:'today', drafts:{}, history:[], metrics:{}, lastBackup:null}; }
+function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+function normalize(s){
+  var o = fresh();
+  if (!s || typeof s !== 'object') return o;
+  Object.keys(s).forEach(function(k){ o[k] = s[k]; });
+  if (!Array.isArray(o.history)) o.history = [];
+  if (!o.drafts || typeof o.drafts !== 'object') o.drafts = {};
+  if (!o.metrics || typeof o.metrics !== 'object') o.metrics = {};
+  o.phase = clamp(parseInt(o.phase,10) || 1, 1, PROGRAM.length);
+  o.day = clamp(parseInt(o.day,10) || 1, 1, PROGRAM[o.phase-1].days.length);
+  if (['today','progress','history','more'].indexOf(o.tab) < 0) o.tab = 'today';
+  o.history.forEach(function(h){ if (!h.id) h.id = uid(); if (!Array.isArray(h.items)) h.items = []; });
+  return o;
+}
+function load(){
+  try {
+    var raw = localStorage.getItem(KEY);
+    return raw ? normalize(JSON.parse(raw)) : fresh();
+  } catch(e){ storageOK = false; return fresh(); }
+}
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(S)); storageOK = true; }
+  catch(e){ storageOK = false; toast('Couldn’t save — this browser is blocking storage'); }
+}
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+var S = load();
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e){}
+
+/* ---------- Helpers ---------- */
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function toDate(v){
+  if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)){ var p = v.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+  return new Date(v);
+}
+function fmtDate(v){
+  var d = toDate(v), now = new Date();
+  return MONTHS[d.getMonth()] + ' ' + d.getDate() + (d.getFullYear() !== now.getFullYear() ? ', ' + d.getFullYear() : '');
+}
+function todayStr(){ var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function isTextUnit(u){ return u === 'time' || u === 'min'; }
+function unitLabel(u){ return u === 'time' ? 'mm:ss' : u; }
+function parseTime(str){
+  str = String(str).trim();
+  if (!str) return NaN;
+  if (str.indexOf(':') >= 0){
+    var parts = str.split(':').map(Number);
+    if (parts.some(isNaN)) return NaN;
+    return parts.length === 3 ? parts[0]*3600 + parts[1]*60 + parts[2] : parts[0]*60 + parts[1];
+  }
+  var m = parseFloat(str);
+  return isNaN(m) ? NaN : Math.round(m*60);
+}
+function fmtTime(sec){ sec = Math.round(sec); var m = Math.floor(sec/60), s = sec % 60; return m + ':' + String(s).padStart(2,'0'); }
+function fmtNum(v){ return (Math.round(v*10)/10).toString(); }
+function fmtMetric(m, v){ return m.kind === 'time' ? fmtTime(v) : fmtNum(v) + ' ' + m.unit; }
+function dkey(){ return S.phase + '-' + S.day; }
+function getDraft(create){
+  var k = dkey();
+  if (!S.drafts[k]){ if (!create) return {vals:[], done:[]}; S.drafts[k] = {vals:[], done:[]}; }
+  return S.drafts[k];
+}
+function nextDay(){ return S.day % PROGRAM[S.phase-1].days.length + 1; }
+function lastValues(p, dn){
+  var items = PROGRAM[p-1].days[dn-1].items, out = [];
+  items.forEach(function(it, i){
+    for (var k = S.history.length - 1; k >= 0; k--){
+      var h = S.history[k];
+      if (h.phase !== p || h.day !== dn) continue;
+      var match = null;
+      for (var j = 0; j < h.items.length; j++){ if (h.items[j].label === it.t){ match = h.items[j]; break; } }
+      if (match && match.value){ out[i] = {value: match.value, ts: h.ts}; break; }
+    }
+  });
+  return out;
+}
+function daysSince(iso){ return iso ? (Date.now() - new Date(iso).getTime()) / 86400000 : Infinity; }
+
+var toastTimer = null;
+function toast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+}
+
+/* ---------- Views ---------- */
+var view = document.getElementById('view');
+
+function render(){
+  document.querySelectorAll('.tabbar button').forEach(function(b){
+    if (b.dataset.tab === S.tab) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  var titles = {today:'Today', progress:'Progress', history:'History', more:'More'};
+  document.getElementById('title').textContent = titles[S.tab];
+  var sub = '';
+  if (S.tab === 'today') sub = 'Phase ' + S.phase + ' · Day ' + S.day;
+  if (S.tab === 'history') sub = S.history.length + (S.history.length === 1 ? ' session' : ' sessions');
+  document.getElementById('subtitle').textContent = sub;
+  var html = {today:renderToday, progress:renderProgress, history:renderHistory, more:renderMore}[S.tab]();
+  if (!storageOK) html = '<div class="banner"><span>This browser is blocking storage, so nothing will be kept. Private browsing may be on.</span></div>' + html;
+  view.innerHTML = html;
+}
+
+function renderToday(){
+  var ph = PROGRAM[S.phase-1], day = ph.days[S.day-1], d = getDraft(false), last = lastValues(S.phase, S.day);
+  var h = '';
+  if (S.history.length >= 5 && daysSince(S.lastBackup) > 14){
+    h += '<div class="banner"><span>No backup in 2+ weeks</span><button data-act="export">Back up</button></div>';
+  }
+  h += '<div class="seg" role="group" aria-label="Phase">';
+  PROGRAM.forEach(function(p, i){
+    h += '<button data-act="phase" data-v="' + (i+1) + '"' + (S.phase === i+1 ? ' class="on" aria-pressed="true"' : ' aria-pressed="false"') + '><b>P' + (i+1) + '</b><small>' + esc(p.months) + '</small></button>';
+  });
+  h += '</div><p class="phase-name">' + esc(ph.name) + '</p>';
+  h += '<div class="days" role="group" aria-label="Day">';
+  for (var i = 1; i <= ph.days.length; i++){
+    h += '<button data-act="day" data-v="' + i + '"' + (S.day === i ? ' class="on" aria-pressed="true"' : ' aria-pressed="false"') + '>D' + i + '</button>';
+  }
+  h += '</div>';
+  h += '<section class="card"><div class="eyebrow">Phase ' + S.phase + ' · Day ' + S.day + '</div><h2>' + esc(day.title) + '</h2>';
+  h += '<details class="warm"><summary>Warm-up first · 5–8 min</summary><p>' + esc(WARMUP) + '</p></details>';
+  day.items.forEach(function(it, i){
+    var done = !!d.done[i], v = d.vals[i] || '', l = last[i];
+    var lastTxt = l ? 'Last: <b>' + esc(l.value) + '</b> ' + esc(unitLabel(it.u)) + ' · ' + fmtDate(l.ts) : 'No previous entry';
+    h += '<div class="ex' + (done ? ' done' : '') + '">'
+      + '<button class="chk" data-act="toggle" data-i="' + i + '" aria-pressed="' + done + '" aria-label="Mark done: ' + esc(it.t) + '">' + CHECK + '</button>'
+      + '<div><div class="ex-label">' + esc(it.t) + '</div><div class="ex-last num">' + lastTxt + '</div></div>'
+      + '<label class="field"><input id="v-' + S.phase + '-' + S.day + '-' + i + '" data-i="' + i + '" value="' + esc(v) + '" inputmode="' + (isTextUnit(it.u) ? 'text' : 'decimal') + '" autocomplete="off" autocorrect="off" enterkeyhint="done" placeholder="' + (l ? esc(l.value) : '—') + '" aria-label="' + esc(it.t) + ', ' + esc(unitLabel(it.u)) + '"><span>' + esc(unitLabel(it.u)) + '</span></label>'
+      + '</div>';
+  });
+  h += '<div class="save-row"><button class="btn" data-act="save">Save session</button>'
+    + '<p class="hint">Numbers save as you type. Saving logs this day and moves you to Day ' + nextDay() + '.</p></div></section>';
+  return h;
+}
+
+function spark(m, list){
+  var W = 300, H = 56, P = 6;
+  var vals = list.map(function(r){ return r.value; });
+  var lo = Math.min.apply(null, vals.concat([m.goal])), hi = Math.max.apply(null, vals.concat([m.goal]));
+  var span = (hi - lo) || 1;
+  lo -= span * 0.08; hi += span * 0.08; span = hi - lo;
+  function x(i){ return P + i * (W - 2*P) / (vals.length - 1); }
+  function y(v){ return H - P - ((v - lo) / span) * (H - 2*P); }
+  var pts = vals.map(function(v, i){ return x(i).toFixed(1) + ',' + y(v).toFixed(1); }).join(' ');
+  var gy = y(m.goal).toFixed(1);
+  var lx = x(vals.length - 1).toFixed(1), ly = y(vals[vals.length - 1]).toFixed(1);
+  return '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Trend of ' + esc(m.name) + ' results">'
+    + '<line x1="' + P + '" x2="' + (W-P) + '" y1="' + gy + '" y2="' + gy + '" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>'
+    + '<polyline points="' + pts + '" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'
+    + '<circle cx="' + lx + '" cy="' + ly + '" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>'
+    + '</svg><div class="spark-key"><span><i></i>Standard</span><span>' + (m.better === 'low' ? 'Lower is better' : 'Higher is better') + '</span></div>';
+}
+
+function renderProgress(){
+  var h = '<p class="lede">Test these every 4–6 weeks and log the result. The standard line is what the course requires.</p>';
+  METRICS.forEach(function(m){
+    var list = (S.metrics[m.id] || []).slice().sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    var latest = list[list.length - 1];
+    var pill = '';
+    if (latest){
+      var ok = m.better === 'high' ? latest.value >= m.goal : latest.value <= m.goal;
+      var gap = Math.abs(latest.value - m.goal);
+      pill = ok ? '<span class="pill good">Meets standard</span>'
+                : '<span class="pill warn">' + (m.kind === 'time' ? fmtTime(gap) + ' over' : fmtNum(gap) + ' ' + m.unit + ' to go') + '</span>';
+    }
+    h += '<section class="metric"><div class="m-head"><div><div class="m-name">' + esc(m.name) + '</div>'
+      + '<div class="m-goal">' + esc(m.detail) + ' · standard ' + (m.better === 'low' ? '≤ ' : '') + fmtMetric(m, m.goal) + '</div></div>' + pill + '</div>'
+      + '<div class="m-val">' + (latest ? fmtMetric(m, latest.value) : '<span class="m-none">No tests logged yet</span>') + '</div>'
+      + (list.length >= 2 ? spark(m, list) : '')
+      + '<div class="m-add"><input id="m-' + m.id + '" data-mid="' + m.id + '" inputmode="' + (m.kind === 'time' ? 'text' : 'decimal') + '" placeholder="' + (m.kind === 'time' ? 'Time, e.g. 13:20' : 'Result in ' + m.unit) + '" autocomplete="off" enterkeyhint="done" aria-label="New ' + esc(m.name) + ' result"><button data-act="m-add" data-id="' + m.id + '">Log</button></div>';
+    if (list.length){
+      h += '<details class="m-list"><summary>All results (' + list.length + ')</summary>';
+      list.slice().reverse().forEach(function(r){
+        h += '<div class="m-row"><span>' + fmtDate(r.date) + '</span><span class="num">' + fmtMetric(m, r.value) + '</span><button class="x" data-act="m-del" data-id="' + m.id + '" data-r="' + r.id + '" aria-label="Delete this result">×</button></div>';
+      });
+      h += '</details>';
+    }
+    h += '</section>';
+  });
+  return h;
+}
+
+function renderHistory(){
+  if (!S.history.length) return '<p class="empty">Sessions you save on the Today tab show up here, with every number you logged.</p>';
+  var h = '';
+  S.history.slice().reverse().forEach(function(s){
+    var done = s.items.filter(function(x){ return x.done; }).length;
+    h += '<details class="sess"><summary><div><div class="s-title">' + esc(s.title) + '</div><div class="s-meta">' + fmtDate(s.ts) + ' · Phase ' + s.phase + ' · Day ' + s.day + '</div></div>'
+      + '<span class="s-count num' + (done === s.items.length ? ' full' : '') + '">' + done + '/' + s.items.length + '</span></summary><div class="s-body">';
+    s.items.forEach(function(x){
+      h += '<div class="s-row"><span' + (x.done ? '' : ' class="muted"') + '>' + esc(x.label) + '</span><span class="num">' + (x.value ? esc(x.value) + ' ' + esc(unitLabel(x.unit)) : '—') + '</span></div>';
+    });
+    h += '<button class="link-danger" data-act="h-del" data-id="' + s.id + '">Delete this session</button></div></details>';
+  });
+  return h;
+}
+
+function renderMore(){
+  var h = '<section class="section"><h3>The standard</h3><h4>Part 1 · Combat uniform · 14 min cap</h4>';
+  STANDARD1.forEach(function(r){ h += '<div class="row"><span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span></div>'; });
+  h += '<h4>Part 2 · PT uniform</h4>';
+  STANDARD2.forEach(function(r){ h += '<div class="row"><span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span></div>'; });
+  h += '</section>';
+  h += '<section class="section"><h3>Warm-up and cool-down</h3><h4>Warm-up · 5–8 min</h4><p>' + esc(WARMUP) + '</p><h4>Cool-down · 5 min</h4><p>' + esc(COOLDOWN) + '</p></section>';
+  h += '<section class="section"><h3>Backup</h3><p>Your data is stored on this phone only. Deleting the home-screen icon deletes it too. Export a backup now and then and save it to Files or iCloud Drive.</p>'
+    + '<p><b>Last backup:</b> ' + (S.lastBackup ? fmtDate(S.lastBackup) : 'never') + '</p>'
+    + '<div class="stack"><button class="btn" data-act="export">Export backup</button><button class="btn secondary" data-act="import">Restore from backup</button></div></section>';
+  h += '<section class="section"><h3>Start over</h3><p>Erases all sessions, test results and drafts on this phone.</p><button class="btn danger" data-act="reset">Erase all data</button></section>';
+  return h;
+}
+
+/* ---------- Actions ---------- */
+function saveSession(){
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  var day = PROGRAM[S.phase-1].days[S.day-1], d = getDraft(false);
+  var items = day.items.map(function(it, i){ return {label: it.t, unit: it.u, value: String(d.vals[i] || '').trim(), done: !!d.done[i]}; });
+  if (!items.some(function(x){ return x.done || x.value; }) && !confirm('Nothing is checked off or logged. Save anyway?')) return;
+  S.history.push({id: uid(), ts: new Date().toISOString(), phase: S.phase, day: S.day, title: day.title, items: items});
+  delete S.drafts[dkey()];
+  var prev = S.day;
+  S.day = nextDay();
+  save(); render(); window.scrollTo(0, 0);
+  toast('Day ' + prev + ' saved. Up next: Day ' + S.day);
+}
+
+function addMetric(id){
+  var m = METRICS.filter(function(x){ return x.id === id; })[0];
+  var inp = document.getElementById('m-' + id);
+  var raw = inp.value.trim();
+  var v = m.kind === 'time' ? parseTime(raw) : parseFloat(raw);
+  if (!raw || isNaN(v) || v <= 0){ toast(m.kind === 'time' ? 'Enter a time like 13:20' : 'Enter a number'); inp.focus(); return; }
+  if (!S.metrics[id]) S.metrics[id] = [];
+  S.metrics[id].push({id: uid(), date: todayStr(), value: v});
+  inp.blur();
+  save(); render();
+  toast(m.name + ': ' + fmtMetric(m, v) + ' logged');
+}
+
+function exportData(){
+  var json = JSON.stringify(S, null, 2);
+  var name = 'ranger-prep-backup-' + todayStr() + '.json';
+  var done = function(){ S.lastBackup = new Date().toISOString(); save(); render(); toast('Backup exported'); };
+  var file;
+  try { file = new File([json], name, {type: 'application/json'}); } catch(e){ file = null; }
+  if (file && navigator.canShare && navigator.canShare({files: [file]})){
+    navigator.share({files: [file], title: 'Ranger Prep backup'}).then(done).catch(function(err){
+      if (err && err.name === 'AbortError') return;
+      download(json, name); done();
+    });
+    return;
+  }
+  download(json, name); done();
+}
+function download(text, name){
+  var url = URL.createObjectURL(new Blob([text], {type: 'application/json'}));
+  var a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+}
+
+document.getElementById('importFile').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  f.text().then(function(txt){
+    var data = JSON.parse(txt);
+    if (!data || !Array.isArray(data.history)) throw new Error('bad');
+    if (!confirm('Replace everything on this phone with this backup (' + data.history.length + ' sessions)?')) return;
+    S = normalize(data); S.tab = 'more';
+    save(); render(); toast('Backup restored');
+  }).catch(function(){ toast('That file isn’t a Ranger Prep backup'); });
+});
+
+/* ---------- Events ---------- */
+document.querySelector('.tabbar').addEventListener('click', function(e){
+  var b = e.target.closest('[data-tab]');
+  if (!b) return;
+  S.tab = b.dataset.tab; save(); render(); window.scrollTo(0, 0);
+});
+
+view.addEventListener('click', function(e){
+  var b = e.target.closest('[data-act]');
+  if (!b) return;
+  var act = b.dataset.act;
+  if (act === 'phase'){ S.phase = +b.dataset.v; S.day = Math.min(S.day, PROGRAM[S.phase-1].days.length); save(); render(); }
+  else if (act === 'day'){ S.day = +b.dataset.v; save(); render(); }
+  else if (act === 'toggle'){
+    var i = +b.dataset.i, d = getDraft(true);
+    d.done[i] = !d.done[i]; save();
+    b.closest('.ex').classList.toggle('done', d.done[i]);
+    b.setAttribute('aria-pressed', String(d.done[i]));
+  }
+  else if (act === 'save') saveSession();
+  else if (act === 'm-add') addMetric(b.dataset.id);
+  else if (act === 'm-del'){
+    if (!confirm('Delete this result?')) return;
+    S.metrics[b.dataset.id] = (S.metrics[b.dataset.id] || []).filter(function(r){ return r.id !== b.dataset.r; });
+    save(); render();
+  }
+  else if (act === 'h-del'){
+    if (!confirm('Delete this session and its numbers?')) return;
+    S.history = S.history.filter(function(s){ return s.id !== b.dataset.id; });
+    save(); render(); toast('Session deleted');
+  }
+  else if (act === 'export') exportData();
+  else if (act === 'import') document.getElementById('importFile').click();
+  else if (act === 'reset'){
+    if (!confirm('Erase all sessions, test results and drafts? This can’t be undone.')) return;
+    S = fresh(); S.tab = 'more'; save(); render(); toast('All data erased');
+  }
+});
+
+view.addEventListener('input', function(e){
+  var inp = e.target;
+  if (!inp.matches('.field input')) return;
+  var i = +inp.dataset.i, d = getDraft(true);
+  d.vals[i] = inp.value;
+  if (inp.value.trim() && !d.done[i]){
+    d.done[i] = true;
+    var row = inp.closest('.ex');
+    row.classList.add('done');
+    row.querySelector('.chk').setAttribute('aria-pressed', 'true');
+  }
+  save();
+});
+
+view.addEventListener('keydown', function(e){
+  if (e.key !== 'Enter') return;
+  var inp = e.target;
+  if (inp.dataset && inp.dataset.mid){ e.preventDefault(); addMetric(inp.dataset.mid); }
+  else if (inp.matches && inp.matches('.field input')){ e.preventDefault(); inp.blur(); }
+});
+
+render();
+
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
+})();
+</script>
+</body>
+</html>
